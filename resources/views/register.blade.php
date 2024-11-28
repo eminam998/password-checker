@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Register</title>
-    @vite('resources/css/app.css') <!-- Ensure Vite is correctly set up -->
+    @vite('resources/css/app.css')
 </head>
 <body class="bg-blue-100 min-h-screen flex items-center justify-center">
 
