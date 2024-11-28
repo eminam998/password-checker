@@ -23,7 +23,7 @@ class UserRequest extends FormRequest
     {
         return [
             'username' => 'required|string|unique:users,username',
-            'password' => 'required|string',
+            'password' => 'required|min:6',
         ];
     }
 }

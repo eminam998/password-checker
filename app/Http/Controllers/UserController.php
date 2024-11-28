@@ -3,12 +3,17 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\UserRequest;
-use App\Models\User;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
+use App\Repositories\UserRepositoryInterface;
 
 class UserController extends Controller
 {
+    protected $userRepository;
+
+    public function __construct(UserRepositoryInterface $userRepository)
+    {
+        $this->userRepository = $userRepository;
+    }
+
     public function showRegistrationForm()
     {
         return view('register');
@@ -16,9 +21,10 @@ class UserController extends Controller
 
     public function register(UserRequest $request)
     {
-        $existingUser = User::all()->first(function ($user) use ($request) {
-            return Hash::check($request->password, $user->password);
-        });
+        $validated = $request->validated();
+
+        // Check if password is already used by another user
+        $existingUser = $this->userRepository->findByPassword($validated['password']);
 
         if ($existingUser) {
             return back()->withErrors([
@@ -26,11 +32,8 @@ class UserController extends Controller
             ])->withInput();
         }
 
-
-        $user = User::create([
-            'username' => $request->username,
-            'password' => bcrypt($request->password),
-        ]);
+        // Create new user
+        $user = $this->userRepository->createUser($validated);
 
         return view('success', ['username' => $user->username]);
     }
