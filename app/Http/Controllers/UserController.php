@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\UserRequest;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -13,13 +14,8 @@ class UserController extends Controller
         return view('register');
     }
 
-    public function register(Request $request)
+    public function register(UserRequest $request)
     {
-        $request->validate([
-            'username' => 'required|string|unique:users,username',
-            'password' => 'required|string',
-        ]);
-
         $existingUser = User::all()->first(function ($user) use ($request) {
             return Hash::check($request->password, $user->password);
         });
