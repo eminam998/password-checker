@@ -23,7 +23,6 @@ class UserController extends Controller
     {
         $validated = $request->validated();
 
-        // Check if password is already used by another user
         $existingUser = $this->userRepository->findByPassword($validated['password']);
 
         if ($existingUser) {
@@ -32,7 +31,6 @@ class UserController extends Controller
             ])->withInput();
         }
 
-        // Create new user
         $user = $this->userRepository->createUser($validated);
 
         return view('success', ['username' => $user->username]);
