@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\UserRequest;
 use App\Repositories\UserRepositoryInterface;
+use Illuminate\Support\Facades\Log;
 
 class UserController extends Controller
 {
@@ -23,16 +24,29 @@ class UserController extends Controller
     {
         $validated = $request->validated();
 
-        $existingUser = $this->userRepository->findByPassword($validated['password']);
+        try {
+            $existingUser = $this->userRepository->findByPassword($validated['password']);
 
-        if ($existingUser) {
+            if ($existingUser) {
+                return back()->withErrors([
+                    'password' => "Sorry, this password is already used by {$existingUser->username}",
+                ])->withInput();
+            }
+
+            $user = $this->userRepository->createUser($validated);
+
+            return view('success', ['username' => $user->username]);
+
+        } catch (\RuntimeException $e) {
+            Log::error("Runtime exception during registration: " . $e->getMessage());
             return back()->withErrors([
-                'password' => "Sorry, this password is already used by {$existingUser->username}",
+                'general' => 'An error occurred during registration. Please try again later.',
+            ])->withInput();
+        } catch (\Exception $e) {
+            Log::error("Unexpected exception: " . $e->getMessage());
+            return back()->withErrors([
+                'general' => 'An unexpected error occurred. Please contact support.',
             ])->withInput();
         }
-
-        $user = $this->userRepository->createUser($validated);
-
-        return view('success', ['username' => $user->username]);
     }
 }
